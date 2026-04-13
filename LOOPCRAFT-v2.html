@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOOPCRAFT | Digital Architecture for the Enterprise</title>
+
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- Animation Engines -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/lenis@1.0.45/dist/lenis.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* --- DESIGN TOKENS --- */
+        :root {
+            /* Palette: Editorial minimalism - expensive paper meets technical precision */
+            --color-bg: #F4F4F0;
+            --color-bg-alt: #EBEBE6;
+            --color-surface: #FFFFFF;
+            --color-text: #0A0A0A;
+            --color-text-muted: #6B6B6B;
+            --color-text-light: #9A9A9A;
+            --color-border: rgba(10, 10, 10, 0.08);
+            --color-border-strong: rgba(10, 10, 10, 0.2);
+            --color-accent: #1A1A1A;
+
+            /* Typography */
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'Space Mono', monospace;
+
+            /* Easing */
+            --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+            --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+            --ease-sine: cubic-bezier(0.37, 0, 0.63, 1);
+
+            /* Spacing */
+            --spacing-unit: 8px;
+            --spacing-section: clamp(80px, 15vw, 180px);
+            --spacing-gutter: clamp(24px, 5vw, 64px);
+            --container-max: 1600px;
+        }
+
+        /* --- RESET & BASE --- */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html.lenis { height: auto; }
+        html.lenis body { height: auto; }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: var(--font-body);
+            font-size: 16px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        ::selection { background-color: var(--color-text); color: var(--color-bg); }
+
+        a { color: inherit; text-decoration: none; }
+        button { font-family: inherit; cursor: none; border: none; background: none; outline: none; }
+        ul { list-style: none; }
+        img, svg { display: block; max-width: 100%; }
+
+        /* --- CUSTOM CURSOR --- */
+        .cursor {
+            position: fixed;
+            top: 0; left: 0;
+            width: 20px; height: 20px;
+            border: 2px solid var(--color-text);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s var(--ease-sine), height 0.3s var(--ease-sine), background-color 0.3s var(--ease-sine);
+        }
+        .cursor.hover { width: 48px; height: 48px; background-color: rgba(10, 10, 10, 0.1); }
+        .cursor.active { width: 12px; height: 12px; background-color: var(--color-text); }
+
+        @media (max-width: 768px) { .cursor { display: none; } }
+
+        /* --- PRELOADER --- */
+        .preloader {
+            position: fixed;
+            inset: 0;
+            background: var(--color-bg);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .preloader__logo {
+            width: 140px; height: 140px;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        .preloader__bar {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 0%; height: 2px;
+            background: var(--color-text);
+        }
+        .preloader.hidden {
+            transform: translateY(-100%);
+            transition: transform 1.2s var(--ease-out-expo);
+        }
+
+        /* --- TYPOGRAPHY --- */
+        .display-xl {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 600;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+        .display-lg {
+            font-family: var(--font-display);
+            font-size: clamp(1.75rem, 4vw, 3rem);
+            font-weight: 500;
+            line-height: 1.1;
+            letter-spacing: -0.01em;
+        }
+        .display-md {
+            font-family: var(--font-display);
+            font-size: clamp(1.5rem, 4vw, 3rem);
+            font-weight: 500;
+            line-height: 1.1;
+        }
+        .body-lg {
+            font-size: clamp(1.125rem, 1.5vw, 1.375rem);
+            font-weight: 300;
+            line-height: 1.7;
+            color: var(--color-text-muted);
+        }
+        .body {
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+        .label {
+            font-family: var(--font-mono);
+            font-size: 0.6875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-weight: 400;
+        }
+        .label--strong {
+            font-weight: 700;
+            letter-spacing: 0.12em;
+        }
+
+        /* --- LAYOUT --- */
+        .container {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            padding: 0 var(--spacing-gutter);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--spacing-gutter);
+        }
+
+        /* --- NAVIGATION --- */
+        .nav {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: clamp(20px, 4vw, 40px) 0;
+            transition: transform 0.4s var(--ease-sine), background 0.4s var(--ease-sine), padding 0.4s var(--ease-sine);
+        }
+        .nav.scrolled {
+            background: rgba(244, 244, 240, 0.85);
+            backdrop-filter: blur(20px);
+            padding: 12px 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .nav__inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav__brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-family: var(--font-display);
+            font-size: 1.125rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+        }
+        .nav__logo {
+            width: 44px; height: 44px;
+        }
+        .nav__links {
+            display: flex;
+            gap: clamp(24px, 4vw, 48px);
+        }
+        .nav__link {
+            font-size: 0.875rem;
+            font-weight: 500;
+            position: relative;
+            padding-bottom: 4px;
+        }
+        .nav__link::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 1px;
+            background: var(--color-text);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s var(--ease-sine);
+        }
+        .nav__link:hover::after { transform: scaleX(1); transform-origin: left; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 32px;
+            border-radius: 100px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.3s var(--ease-sine);
+        }
+        .btn--primary {
+            background: var(--color-text);
+            color: var(--color-bg);
+        }
+        .btn--primary:hover {
+            background: var(--color-text-muted);
+            transform: translateY(-2px);
+        }
+        .btn--outline {
+            border: 1px solid var(--color-border-strong);
+            color: var(--color-text);
+        }
+        .btn--outline:hover {
+            border-color: var(--color-text);
+            background: var(--color-text);
+            color: var(--color-bg);
+        }
+
+        @media (max-width: 1024px) {
+            .nav__links { display: none; }
+        }
+
+        /* --- HERO --- */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: clamp(60px, 10vh, 100px);
+        }
+        .hero__content { grid-column: 1 / 11; margin-bottom: 48px; }
+        .hero__description { grid-column: 1 / 6; margin-bottom: 64px; }
+        .hero__meta {
+            grid-column: 11 / 13;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            border-left: 1px solid var(--color-border);
+            padding-left: 24px;
+            gap: 8px;
+        }
+        .reveal-text { overflow: hidden; display: inline-block; }
+        .reveal-text span { display: inline-block; transform: translateY(100%); }
+
+        /* --- SECTION STYLES --- */
+        .section { padding: var(--spacing-section) 0; }
+        .section__header {
+            grid-column: 1 / 6;
+            margin-bottom: 64px;
+        }
+        .section__label {
+            display: block;
+            margin-bottom: 24px;
+            color: var(--color-text-light);
+        }
+
+        /* --- PHILOSOPHY GRID --- */
+        .philosophy { grid-column: 6 / 13; display: grid; grid-template-columns: repeat(2, 1fr); gap: 48px; }
+        .philosophy__item {
+            border-top: 1px solid var(--color-border);
+            padding-top: 24px;
+        }
+        .philosophy__number {
+            display: block;
+            margin-bottom: 16px;
+            color: var(--color-text-light);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+        }
+        .philosophy__title { margin-bottom: 12px; }
+
+        /* --- SERVICES ACCORDION --- */
+        .services {
+            border-top: 1px solid var(--color-border);
+            border-bottom: 1px solid var(--color-border);
+        }
+        .accordion__item {
+            border-bottom: 1px solid var(--color-border);
+        }
+        .accordion__item:last-child { border-bottom: none; }
+        .accordion__trigger {
+            padding: clamp(40px, 6vw, 72px) 0;
+            cursor: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .accordion__trigger i {
+            transition: transform 0.4s var(--ease-sine);
+        }
+        .accordion__item.active .accordion__trigger i { transform: rotate(45deg); }
+        .accordion__content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s var(--ease-out-expo);
+        }
+        .accordion__inner {
+            padding-bottom: 48px;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--spacing-gutter);
+        }
+        .service-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .service-list__item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .service-list__item::before {
+            content: '';
+            width: 4px; height: 4px;
+            background: var(--color-text);
+            border-radius: 50%;
+        }
+
+        /* --- CONTACT --- */
+        .contact {
+            background: var(--color-text);
+            color: var(--color-bg);
+        }
+        .contact .section__label { color: rgba(255,255,255,0.3); }
+        .contact .body-lg { color: rgba(255,255,255,0.6); }
+        .contact__form { grid-column: 7 / 13; }
+        .form__group {
+            margin-bottom: 48px;
+            position: relative;
+        }
+        .form__input {
+            width: 100%;
+            padding: 20px 0;
+            border: none;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            font-size: 1.25rem;
+            font-family: var(--font-body);
+            background: transparent;
+            color: var(--color-bg);
+            transition: border-color 0.3s var(--ease-sine);
+        }
+        .form__input::placeholder { color: rgba(255,255,255,0.2); font-weight: 300; }
+        .form__input:focus { border-color: var(--color-bg); }
+
+        /* --- FOOTER --- */
+        .footer {
+            padding: 80px 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            background: var(--color-text);
+            color: var(--color-bg);
+        }
+        .footer__brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .footer__logo {
+            width: 56px; height: 56px;
+        }
+        .footer__logo .logo-symbol { stroke: #ffffff; }
+        .footer__meta { text-align: right; }
+
+        /* --- CHAT WIDGET --- */
+        .chat-dock {
+            position: fixed;
+            bottom: 40px; right: 40px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 20px;
+        }
+        .chat-trigger {
+            width: 64px; height: 64px;
+            background: var(--color-text);
+            color: var(--color-bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            transition: transform 0.4s var(--ease-out-expo);
+        }
+        .chat-trigger:hover { transform: scale(1.1); }
+        .chat-window {
+            width: 420px; height: 580px;
+            background: rgba(244, 244, 240, 0.95);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--color-border);
+            border-radius: 24px;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.15);
+            transform-origin: bottom right;
+        }
+        .chat-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-header__title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+        }
+        .chat-status {
+            width: 8px; height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .message {
+            padding: 16px 20px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.5;
+            max-width: 85%;
+            font-weight: 400;
+        }
+        .message--ai {
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            align-self: flex-start;
+            color: var(--color-text);
+        }
+        .message--user {
+            background: var(--color-text);
+            color: var(--color-bg);
+            align-self: flex-end;
+        }
+        .chat-input {
+            padding: 16px 24px;
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            gap: 12px;
+            background: var(--color-bg);
+        }
+        .chat-input input {
+            flex: 1;
+            font-size: 14px;
+            font-family: var(--font-body);
+            border: none;
+            background: transparent;
+            outline: none;
+        }
+        .chat-input button {
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .chat-window { width: calc(100vw - 40px); height: 70vh; }
+            .chat-dock { bottom: 20px; right: 20px; }
+        }
+
+        /* --- ANIMATION UTILITIES --- */
+        .fade-up { opacity: 0; transform: translateY(40px); }
+    </style>
+</head>
+<body>
+
+    <!-- Custom Cursor -->
+    <div class="cursor" id="cursor"></div>
+
+    <!-- Preloader -->
+    <div class="preloader" id="preloader">
+        <svg class="preloader__logo" viewBox="0 0 500 500" width="160" height="160">
+            <g stroke="#0A0A0A" stroke-linecap="butt">
+                <circle cx="250" cy="220" r="110" fill="none" stroke-width="4" />
+                <line x1="235" y1="375" x2="370" y2="105" stroke-width="4" />
+            </g>
+            <text x="250" y="420" font-family="'Montserrat', 'Avenir', 'Futura', sans-serif" font-size="28" font-weight="500" fill="#0A0A0A" text-anchor="middle" letter-spacing="12">LOOPCRAFT</text>
+        </svg>
+        <div class="preloader__bar" id="preloader-bar"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav" id="nav">
+        <div class="container nav__inner">
+            <a href="/" class="nav__brand">
+                <svg class="nav__logo" viewBox="0 0 500 500" width="44" height="44">
+                    <g stroke="#0A0A0A" stroke-linecap="butt">
+                        <circle cx="250" cy="220" r="90" fill="none" stroke-width="4" />
+                        <line x1="235" y1="365" x2="355" y2="125" stroke-width="4" />
+                    </g>
+                </svg>
+                <span style="font-size: 1rem; font-weight: 600;">LOOPCRAFT</span>
+            </a>
+            <ul class="nav__links">
+                <li><a href="#philosophy" class="nav__link">Philosophy</a></li>
+                <li><a href="#capabilities" class="nav__link">Capabilities</a></li>
+                <li><a href="#contact" class="nav__link">Inquiry</a></li>
+            </ul>
+            <a href="#contact" class="btn btn--primary">Start a Conversation</a>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container grid">
+                <div class="hero__content" style="grid-column: 1 / 12;">
+                    <h1 class="display-xl">
+                        <span class="reveal-text"><span>Architecture for the</span></span><br>
+                        <span class="reveal-text"><span>Digital Enterprise</span></span>
+                    </h1>
+                </div>
+                <div class="hero__description" style="grid-column: 1 / 6; margin-top: 32px;">
+                    <p class="body-lg">We design and implement high-performance digital infrastructure that enables teams to operate at their full potential.</p>
+                </div>
+                <div class="hero__meta" style="grid-column: 11 / 13;">
+                    <span class="label label--strong">LOOPCRAFT SYSTEMS</span>
+                    <span class="label">Est. 2026</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Philosophy Section -->
+        <section id="philosophy" class="section">
+            <div class="container grid">
+                <div class="section__header">
+                    <span class="section__label label">Philosophy / 01</span>
+                    <h2 class="display-lg">Built on<br>principles<br>that endure</h2>
+                </div>
+                <div class="philosophy">
+                    <div class="philosophy__item">
+                        <span class="philosophy__number">01</span>
+                        <h3 class="display-md philosophy__title">Collaboration</h3>
+                        <p class="body-lg">Empower teams through connection. We simplify complexity by integrating the tools and workflows that enable seamless collaboration across your organization.</p>
+                    </div>
+                    <div class="philosophy__item">
+                        <span class="philosophy__number">02</span>
+                        <h3 class="display-md philosophy__title">Continuity</h3>
+                        <p class="body-lg">Evolve without disruption. Systems should grow with you. We build platforms that maintain operational excellence, aligned with ITIL 4 standards.</p>
+                    </div>
+                    <div class="philosophy__item">
+                        <span class="philosophy__number">03</span>
+                        <h3 class="display-md philosophy__title">Purpose</h3>
+                        <p class="body-lg">Innovate with intention. Every implementation serves a clear objective. We combine structured frameworks with strategic thinking to deliver transformation that matters.</p>
+                    </div>
+                    <div class="philosophy__item">
+                        <span class="philosophy__number">04</span>
+                        <h3 class="display-md philosophy__title">Integrity</h3>
+                        <p class="body-lg">Deliver on commitment. Trust is earned through consistent execution. We provide tailored solutions with measurable value and lasting impact.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Capabilities Section -->
+        <section id="capabilities" class="section services">
+            <div class="container">
+                <div class="section__header">
+                    <span class="section__label label">Capabilities / 02</span>
+                    <h2 class="display-lg">Designed<br>for scale</h2>
+                </div>
+
+                <div style="margin-top: 64px;">
+                    <!-- Service Management -->
+                    <div class="accordion__item">
+                        <div class="accordion__trigger" data-accordion>
+                            <h3 class="display-md">Service Management</h3>
+                            <i data-lucide="arrow-down-right" width="32" height="32"></i>
+                        </div>
+                        <div class="accordion__content">
+                            <div class="accordion__inner">
+                                <div style="grid-column: 1 / 6;">
+                                    <p class="body-lg">Enterprise-grade service management built on ITIL 4 foundations. We configure and govern platforms that operationalize excellence across your organization.</p>
+                                </div>
+                                <div style="grid-column: 7 / 13;">
+                                    <ul class="service-list">
+                                        <li class="service-list__item label label--strong">ITSM Implementation & Governance</li>
+                                        <li class="service-list__item label label--strong">Workflow Design & Automation</li>
+                                        <li class="service-list__item label label--strong">Platform Integration</li>
+                                        <li class="service-list__item label label--strong">Operational Playbooks</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Intelligent Automation -->
+                    <div class="accordion__item">
+                        <div class="accordion__trigger" data-accordion>
+                            <h3 class="display-md">Intelligent Automation</h3>
+                            <i data-lucide="arrow-down-right" width="32" height="32"></i>
+                        </div>
+                        <div class="accordion__content">
+                            <div class="accordion__inner">
+                                <div style="grid-column: 1 / 6;">
+                                    <p class="body-lg">Revenue operations and efficiency through AI-powered automation. We embed intelligent agents into your existing stack to eliminate manual work and accelerate throughput.</p>
+                                </div>
+                                <div style="grid-column: 7 / 13;">
+                                    <ul class="service-list">
+                                        <li class="service-list__item label label--strong">Content Production Automation</li>
+                                        <li class="service-list__item label label--strong">Lead Qualification Agents</li>
+                                        <li class="service-list__item label label--strong">Invoice Processing Automation</li>
+                                        <li class="service-list__item label label--strong">Custom Workflow Bots</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Digital Transformation -->
+                    <div class="accordion__item">
+                        <div class="accordion__trigger" data-accordion>
+                            <h3 class="display-md">Digital Transformation</h3>
+                            <i data-lucide="arrow-down-right" width="32" height="32"></i>
+                        </div>
+                        <div class="accordion__content">
+                            <div class="accordion__inner">
+                                <div style="grid-column: 1 / 6;">
+                                    <p class="body-lg">Strategic digital transformation grounded in operational reality. We assess, design, and implement the systems that enable your teams to perform at their best.</p>
+                                </div>
+                                <div style="grid-column: 7 / 13;">
+                                    <ul class="service-list">
+                                        <li class="service-list__item label label--strong">Process Digitalization</li>
+                                        <li class="service-list__item label label--strong">Workspace Architecture</li>
+                                        <li class="service-list__item label label--strong">Team Enablement Programs</li>
+                                        <li class="service-list__item label label--strong">Technology Roadmapping</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="section contact">
+            <div class="container grid">
+                <div class="section__header">
+                    <span class="section__label label">Contact / 03</span>
+                    <h2 class="display-lg">Let's build<br>something<br>enduring</h2>
+                    <a href="mailto:loopcraftsystems@gmail.com" class="display-md" style="font-size: 1.5rem; color: var(--color-bg); display: block; margin-top: 32px;">loopcraftsystems<br>@gmail.com</a>
+                </div>
+                <div class="contact__form">
+                    <form onsubmit="event.preventDefault();">
+                        <div class="form__group">
+                            <input type="text" class="form__input" placeholder="Full Name" required>
+                        </div>
+                        <div class="form__group">
+                            <input type="text" class="form__input" placeholder="Company Name" required>
+                        </div>
+                        <div class="form__group">
+                            <input type="email" class="form__input" placeholder="Email Address" required>
+                        </div>
+                        <button type="submit" class="btn btn--primary">Submit Inquiry</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container grid">
+            <div class="footer__brand" style="grid-column: 1 / 6;">
+                <svg class="footer__logo" viewBox="0 0 500 500" width="56" height="56">
+                    <g stroke="#ffffff" stroke-linecap="butt">
+                        <circle cx="250" cy="220" r="90" fill="none" stroke-width="4" />
+                        <line x1="235" y1="365" x2="355" y2="125" stroke-width="4" />
+                    </g>
+                </svg>
+                <span style="font-size: 1.25rem; font-weight: 600;">LOOPCRAFT</span>
+            </div>
+            <div class="footer__meta" style="grid-column: 7 / 13;">
+                <span class="label">&copy; 2026 LoopCraft Systems</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chat Widget -->
+    <div class="chat-dock">
+        <div class="chat-window" id="chat-window">
+            <div class="chat-header">
+                <div class="chat-header__title">
+                    <div class="chat-status"></div>
+                    <span>Client Services</span>
+                </div>
+                <button onclick="toggleChat()" class="label" style="opacity: 0.5;">Close</button>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="message message--ai">
+                    Welcome to LoopCraft Studio. I'm here to assist with any technical inquiries or architectural questions you may have. How can we help you today?
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chat-input-field" placeholder="Describe your inquiry..." autocomplete="off">
+                <button id="chat-send" aria-label="Send message">→</button>
+            </div>
+        </div>
+        <button class="chat-trigger" onclick="toggleChat()" aria-label="Toggle chat">
+            <i data-lucide="message-square" width="24" height="24"></i>
+        </button>
+    </div>
+
+    <script>
+        (function() {
+            const gsap = window.gsap;
+            const ScrollTrigger = window.ScrollTrigger;
+            const Lenis = window.Lenis;
+            const lucide = window.lucide;
+
+            if (!gsap) {
+                console.warn('GSAP not loaded - displaying static content');
+                document.getElementById('preloader').style.display = 'none';
+                return;
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                // Initialize Lucide icons
+                if (lucide) lucide.createIcons();
+
+                // Register ScrollTrigger
+                if (ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+
+                // Smooth scrolling with Lenis
+                if (Lenis) {
+                    const lenis = new Lenis({ duration: 1.2, smooth: true });
+                    lenis.on('scroll', () => ScrollTrigger?.update());
+                    gsap.ticker.add((time) => lenis.raf(time * 1000));
+                }
+
+                // Custom cursor
+                const cursor = document.getElementById('cursor');
+                if (cursor) {
+                    let cursorX = 0, cursorY = 0;
+                    document.addEventListener('mousemove', (e) => {
+                        cursorX = e.clientX;
+                        cursorY = e.clientY;
+                        cursor.style.left = cursorX + 'px';
+                        cursor.style.top = cursorY + 'px';
+                    });
+
+                    // Cursor hover states
+                    document.querySelectorAll('a, button, .accordion__trigger, .form__input').forEach(el => {
+                        el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+                        el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+                    });
+                }
+
+                // Preloader animation
+                const tl = gsap.timeline();
+                const failSafe = setTimeout(() => {
+                    document.getElementById('preloader').classList.add('hidden');
+                    gsap.to('#nav', { opacity: 1, duration: 1 });
+                }, 4000);
+
+                window.addEventListener('load', () => {
+                    clearTimeout(failSafe);
+                    tl.to('#preloader-bar', { width: '100%', duration: 1.5, ease: 'expo.inOut' })
+                      .to('.preloader__logo', { opacity: 1, scale: 1, duration: 1.2, ease: 'power4.out' }, '-=0.5')
+                      .to('#preloader', { yPercent: -100, duration: 1.5, ease: 'expo.inOut', delay: 0.5 })
+                      .to('#nav', { opacity: 1, duration: 1 }, '-=0.5')
+                      .to('.reveal-text span', { y: '0%', duration: 1.2, stagger: 0.15, ease: 'power4.out' }, '-=1')
+                      .to('.hero .fade-up, .hero__description, .hero__meta', { y: 0, opacity: 1, duration: 1, stagger: 0.1, ease: 'power4.out' }, '-=0.8');
+                });
+
+                // Scroll reveals
+                gsap.utils.toArray('.fade-up, .philosophy__item, .accordion__item').forEach(el => {
+                    gsap.to(el, {
+                        scrollTrigger: { trigger: el, start: 'top 85%' },
+                        y: 0, opacity: 1, duration: 1, ease: 'power4.out'
+                    });
+                });
+
+                // Navigation scroll state
+                window.addEventListener('scroll', () => {
+                    const nav = document.getElementById('nav');
+                    if (nav) {
+                        nav.classList.toggle('scrolled', window.scrollY > 50);
+                    }
+                });
+            });
+        })();
+
+        // Accordion
+        function toggleAccordion(trigger) {
+            const item = trigger.closest('.accordion__item');
+            const content = item.querySelector('.accordion__content');
+            const isActive = item.classList.contains('active');
+
+            document.querySelectorAll('.accordion__item').forEach(el => {
+                el.classList.remove('active');
+                el.querySelector('.accordion__content').style.maxHeight = null;
+            });
+
+            if (!isActive) {
+                item.classList.add('active');
+                content.style.maxHeight = content.scrollHeight + 'px';
+            }
+        }
+
+        document.querySelectorAll('[data-accordion]').forEach(trigger => {
+            trigger.addEventListener('click', () => toggleAccordion(trigger));
+        });
+
+        // Chat widget
+        function toggleChat() {
+            const win = document.getElementById('chat-window');
+            if (!win) return;
+
+            const isOpen = win.style.display === 'flex';
+            if (!isOpen) {
+                win.style.display = 'flex';
+                gsap.fromTo(win, { opacity: 0, scale: 0.8, y: 20 }, { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: 'power4.out' });
+                setTimeout(() => document.getElementById('chat-input-field')?.focus(), 100);
+            } else {
+                gsap.to(win, { opacity: 0, scale: 0.8, y: 20, duration: 0.4, ease: 'power4.in', onComplete: () => win.style.display = 'none' });
+            }
+        }
+
+        function handleSend() {
+            const input = document.getElementById('chat-input-field');
+            const text = input?.value.trim();
+            if (!text) return;
+
+            const container = document.getElementById('chat-messages');
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message message--user';
+            userMsg.textContent = text;
+            container.appendChild(userMsg);
+            input.value = '';
+            container.scrollTop = container.scrollHeight;
+
+            setTimeout(() => {
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'message message--ai';
+                aiMsg.textContent = 'Thank you for your message. A member of our architectural team will analyze your request and respond shortly. Is there anything else you\'d like to add?';
+                container.appendChild(aiMsg);
+                container.scrollTop = container.scrollHeight;
+            }, 1000);
+        }
+
+        document.getElementById('chat-send')?.addEventListener('click', handleSend);
+        document.getElementById('chat-input-field')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSend();
+        });
+    </script>
+</body>
+</html>
