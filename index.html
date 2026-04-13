@@ -856,26 +856,89 @@
             trigger.addEventListener('click', () => toggleAccordion(trigger));
         });
 
-        // Chat widget
+        // Chat widget with lead capture
+        let leadCaptured = false;
+        let leadData = {};
+        const CHAT_ENDPOINT = 'https://formsubmit.co/loopcraftsystems@gmail.com';
+
         function toggleChat() {
             const win = document.getElementById('chat-window');
             if (!win) return;
-
             const isOpen = win.style.display === 'flex';
+            
             if (!isOpen) {
                 win.style.display = 'flex';
-                gsap.fromTo(win, { opacity: 0, scale: 0.8, y: 20 }, { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: 'power4.out' });
-                setTimeout(() => document.getElementById('chat-input-field')?.focus(), 100);
+                gsap.fromTo(win, 
+                    { opacity: 0, scale: 0.8, y: 20 }, 
+                    { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: 'power4.out' }
+                );
+                
+                if (!leadCaptured) {
+                    showLeadForm();
+                } else {
+                    setTimeout(() => document.getElementById('chat-input-field')?.focus(), 100);
+                }
             } else {
-                gsap.to(win, { opacity: 0, scale: 0.8, y: 20, duration: 0.4, ease: 'power4.in', onComplete: () => win.style.display = 'none' });
+                gsap.to(win, { 
+                    opacity: 0, scale: 0.8, y: 20, duration: 0.4, ease: 'power4.in',
+                    onComplete: () => win.style.display = 'none'
+                });
             }
         }
 
-        function handleSend() {
+        function showLeadForm() {
+            const messages = document.getElementById('chat-messages');
+            messages.innerHTML = `
+                <div class="message message--ai">
+                    Welcome to LoopCraft. Before we begin, please introduce yourself:
+                </div>
+                <form id="chat-lead-form" style="width:100%;padding:16px;background:var(--color-surface);border-radius:12px;">
+                    <input type="text" id="chat-name" placeholder="Your Name" required 
+                           style="width:100%;margin-bottom:12px;padding:12px;border:1px solid var(--color-border);border-radius:8px;font-family:inherit;font-size:14px;">
+                    <input type="email" id="chat-email" placeholder="Your Email" required 
+                           style="width:100%;margin-bottom:12px;padding:12px;border:1px solid var(--color-border);border-radius:8px;font-family:inherit;font-size:14px;">
+                    <button type="submit" class="btn btn--primary" style="width:100%;padding:12px;font-size:13px;">
+                        Start Conversation →
+                    </button>
+                </form>
+            `;
+            
+            document.getElementById('chat-lead-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                leadData.name = document.getElementById('chat-name').value;
+                leadData.email = document.getElementById('chat-email').value;
+                leadCaptured = true;
+                
+                await fetch(CHAT_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        _subject: 'New Chat Lead from LoopCraft',
+                        source: 'Chat Widget Lead',
+                        name: leadData.name,
+                        email: leadData.email
+                    })
+                });
+                
+                showChatMessages();
+            });
+        }
+
+        function showChatMessages() {
+            const messages = document.getElementById('chat-messages');
+            messages.innerHTML = `
+                <div class="message message--ai">
+                    Welcome, ${leadData.name}! I'm here to assist with any technical inquiries. How can we help you today?
+                </div>
+            `;
+            setTimeout(() => document.getElementById('chat-input-field')?.focus(), 100);
+        }
+
+        async function handleSend() {
             const input = document.getElementById('chat-input-field');
             const text = input?.value.trim();
             if (!text) return;
-
+            
             const container = document.getElementById('chat-messages');
             const userMsg = document.createElement('div');
             userMsg.className = 'message message--user';
@@ -883,20 +946,31 @@
             container.appendChild(userMsg);
             input.value = '';
             container.scrollTop = container.scrollHeight;
-
+            
+            await fetch(CHAT_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    _subject: `Chat Message from ${leadData.name}`,
+                    source: 'Chat Message',
+                    name: leadData.name,
+                    email: leadData.email,
+                    message: text
+                })
+            });
+            
             setTimeout(() => {
                 const aiMsg = document.createElement('div');
                 aiMsg.className = 'message message--ai';
-                aiMsg.textContent = 'Thank you for your message. A member of our architectural team will analyze your request and respond shortly. Is there anything else you\'d like to add?';
+                aiMsg.textContent = `Thank you for your message. We'll respond to ${leadData.email} shortly.`;
                 container.appendChild(aiMsg);
                 container.scrollTop = container.scrollHeight;
-            }, 1000);
+            }, 800);
         }
 
         document.getElementById('chat-send')?.addEventListener('click', handleSend);
         document.getElementById('chat-input-field')?.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleSend();
-        });
-    </script>
+        });    </script>
 </body>
 </html>
