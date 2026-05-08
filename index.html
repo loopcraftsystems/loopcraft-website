@@ -8,6 +8,9 @@
   <meta name="author" content="LoopCraft Systems" />
   <meta name="keywords" content="ITSM implementation Europe, ITIL 4 consultancy, digital transformation France, EU tender IT services, CPV 72253200, CPV 72600000, CPV 72220000, Estonian public procurement IT" />
   <meta name="robots" content="index, follow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
   <link rel="canonical" href="https://loopcraftsystems.com" />
   <meta property="og:title" content="LOOPCRAFT — Digital Architecture for the Enterprise" />
   <meta property="og:description" content="ITSM EU tender digital transformation France Estonia. High-performance digital infrastructure." />
@@ -19,7 +22,7 @@
   {"@context":"https://schema.org","@type":"Organization","name":"LoopCraft Systems","url":"https://loopcraftsystems.com","address":{"@type":"PostalAddress","addressLocality":"Annemasse","addressCountry":"FR"},"email":"contact@loopcraftsystems.com","foundingDate":"2026","service":["ITSM","Automation","Digital Transformation"]}
   </script>
   <style>
-    :root{--bg:#080808;--bg-alt:#0f0f0f;--surface:#141414;--border:rgba(255,255,255,0.08);--text:#f0f0ec;--text-muted:rgba(240,240,236,0.52);--text-light:rgba(240,240,236,0.28);--accent:#00c8a0;--accent-dim:rgba(0,200,160,0.12);--font-display:'Times New Roman',Georgia,serif;--font-body:system-ui,-apple-system,'Segoe UI',sans-serif;--font-mono:'Courier New',Courier,monospace;--max-w:1440px;--pad-x:clamp(24px,6vw,96px);--section-py:clamp(80px,12vw,160px);--radius:4px;--ease-out:cubic-bezier(0.16,1,0.3,1);--transition:0.35s var(--ease-out)}
+    :root{--bg:#edeade;--bg-alt:#e6e3d8;--surface:#f5f3ee;--border:rgba(0,0,0,0.1);--text:#0a0a0a;--text-muted:rgba(10,10,10,0.52);--text-light:rgba(10,10,10,0.32);--accent:#c8e63c;--accent-dim:rgba(200,230,60,0.15);--font-display:'Inter',system-ui,sans-serif;--font-body:'Inter',system-ui,sans-serif;--font-mono:'Courier New',Courier,monospace;--max-w:1440px;--pad-x:clamp(24px,6vw,96px);--section-py:clamp(80px,12vw,160px);--radius:4px;--ease-out:cubic-bezier(0.16,1,0.3,1);--transition:0.35s var(--ease-out)}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
     body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:clamp(15px,1.1vw,17px);line-height:1.65;overflow-x:hidden}
@@ -40,7 +43,9 @@
     .reveal--delay-4{transition-delay:0.4s}
     @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
     #site-header{position:fixed;inset:0 0 auto;z-index:900;transition:background var(--transition),border-bottom var(--transition),backdrop-filter var(--transition)}
-    #site-header.scrolled{background:rgba(8,8,8,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+    #site-header.scrolled{background:rgba(237,234,222,0.95)  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+  <link rel="canonical" href="https://loopcraftsystems.com" />;backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
     .nav-inner{max-width:var(--max-w);margin-inline:auto;padding-inline:var(--pad-x);height:68px;display:flex;align-items:center;justify-content:space-between;gap:2rem}
     .nav-logo{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:1.0625rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase}
     .nav-logo svg{flex-shrink:0}
@@ -55,14 +60,15 @@
     .hamburger[aria-expanded="true"] span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
     .hamburger[aria-expanded="true"] span:nth-child(2){opacity:0}
     .hamburger[aria-expanded="true"] span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
-    #mobile-menu{display:none;position:fixed;inset:68px 0 0;background:rgba(8,8,8,0.97);backdrop-filter:blur(16px);z-index:850;flex-direction:column;padding:clamp(32px,8vw,64px) var(--pad-x);gap:2rem}
+    #mobile-menu{display:none;position:fixed;inset:68px 0 0;background:rgba(237,234,222,0.98)  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+  <link rel="canonical" href="https://loopcraftsystems.com" />;backdrop-filter:blur(16px);z-index:850;flex-direction:column;padding:clamp(32px,8vw,64px) var(--pad-x);gap:2rem}
     #mobile-menu.open{display:flex}
     #mobile-menu a{font-size:clamp(1.5rem,5vw,2.25rem);font-family:var(--font-display);font-weight:700;letter-spacing:0.02em;color:var(--text-muted);transition:color var(--transition)}
     #mobile-menu a:hover{color:var(--text)}
     body.menu-open{overflow:hidden}
     @media(max-width:860px){.nav-links,.nav-cta{display:none}.hamburger{display:flex}}
     #hero{min-height:100svh;display:grid;align-items:end;padding-block:0 clamp(64px,10vw,120px);padding-top:120px;position:relative;overflow:hidden}
-    #hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 70% 40%,rgba(0,200,160,0.04) 0%,transparent 70%);pointer-events:none}
+    #hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 70% 40%,rgba(200,230,60,0.06) 0%,transparent 70%);pointer-events:none}
     .hero-inner{display:grid;grid-template-columns:1fr auto;gap:4rem;align-items:end}
     .hero-headline{font-family:var(--font-display);font-size:clamp(3.5rem,8.5vw,8rem);font-weight:700;line-height:1;letter-spacing:-0.02em;margin-bottom:clamp(2rem,4vw,3.5rem)}
     .hero-headline em{font-style:normal;color:var(--text-muted)}
@@ -382,21 +388,21 @@
           <span class="case-sector">Public Sector / Health</span>
           <h3 class="case-title">ITSM Transformation for a Public Sector Agency</h3>
           <p class="case-body">The agency was struggling with fragmented communication, manual ticket routing, and a lack of visibility into service performance across departments.</p>
-          <a href="#" class="case-link">Read Case Study</a>
+          
         </article>
         <article class="case-card reveal reveal--delay-1">
           <div class="case-thumb" aria-hidden="true">Elite Legal Group</div>
           <span class="case-sector">Legal / Professional Services</span>
           <h3 class="case-title">Automated Lead Intelligence for Professional Services</h3>
           <p class="case-body">High-value legal leads were being lost due to slow response times and manual qualification processes during non-business hours.</p>
-          <a href="#" class="case-link">Read Case Study</a>
+          
         </article>
         <article class="case-card reveal reveal--delay-2">
           <div class="case-thumb" aria-hidden="true">SaaS Innovators Inc.</div>
           <span class="case-sector">Technology / SaaS</span>
           <h3 class="case-title">Modernizing Digital Workspace Architecture</h3>
           <p class="case-body">Rapid scaling led to tool sprawl and information silos, hindering cross-functional collaboration and project speed.</p>
-          <a href="#" class="case-link">Read Case Study</a>
+          
         </article>
       </div>
     </div>
